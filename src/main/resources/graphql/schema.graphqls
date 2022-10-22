@@ -1,0 +1,92 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"This field is selected by default"
+directive @default on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+"Marks the field, argument, input field or enum value as deprecated"
+directive @deprecated(
+    "The reason for the deprecation"
+    reason: String = "No longer supported"
+  ) on FIELD_DEFINITION | ARGUMENT_DEFINITION | ENUM_VALUE | INPUT_FIELD_DEFINITION
+
+"Directs the executor to include this field or fragment only when the `if` argument is true"
+directive @include(
+    "Included when true."
+    if: Boolean!
+  ) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"Directs the executor to skip this field or fragment when the `if` argument is true."
+directive @skip(
+    "Skipped when true."
+    if: Boolean!
+  ) on FIELD | FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+"Exposes a URL that specifies the behaviour of this scalar."
+directive @specifiedBy(
+    "The URL that specifies the behaviour of this scalar."
+    url: String!
+  ) on SCALAR
+
+interface Item {
+  id: UUID! @default
+}
+
+type Book implements Item {
+  id: UUID! @default
+  title: String! @default
+}
+
+type Mutation {
+  "Mutate books"
+  books(books: [BookInput!]!): [Book!]!
+  "Delete items"
+  delete(items: [ItemInput!]!): [Item!]!
+  "Mutate users"
+  users(users: [UserInput!]!): [User!]!
+}
+
+type Query {
+  "Retrieves users from repository"
+  users(after: UUID, friendIds: [UUID!], ids: [UUID!], limit: Int, names: [String!], reversed: Boolean, usernames: [String!]): UserCollection!
+}
+
+type User implements Item {
+  friendIds: [UUID!]! @default
+  friends(after: UUID, limit: Int, reversed: Boolean): UserCollection!
+  id: UUID! @default
+  name: String! @default
+  username: String! @default
+}
+
+type UserCollection {
+  items: [User!]!
+  totalCount: Int!
+}
+
+enum ItemType {
+  Book
+  User
+}
+
+"A type representing a formatted java.util.UUID"
+scalar UUID
+
+input BookInput {
+  id: UUID! @default
+  title: String! @default
+}
+
+input ItemInput {
+  __typename: ItemType!
+  id: UUID!
+}
+
+input UserInput {
+  friendIds: [UUID!]! @default
+  id: UUID! @default
+  name: String! @default
+  username: String! @default
+}
